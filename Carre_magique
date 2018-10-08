@@ -1,0 +1,185 @@
+ALGO : Carré Magique
+//BUT : Créer un carré magique, tableau d'entiers de 5 par 5 ou 7 par 7, incrémenté par des valeurs de 1 à 25 ou 1 à 49.
+//PRINCIPE : Le premier entier 1 se trouve au nord du milieu de la table
+On place les chiffres de façon croissante en allant au nord est de la position courante, une seule fois
+Si la place est déjà prise, on se déplace au nord-ouest jusqu'à trouver cette place libre
+La grille est considérée comme sphérique
+
+
+X 6 X 2 X
+10 X 1 X X
+X 5 X X 9
+4 X X 8 X
+11 X 7 X 3
+
+Créer algo du carré magique en tableau à 2 DIM qui matérialisera la grille 
+Structure enregistrement contenant les positions x et y 
+Fonctionne pour 5 par 5 ou 7 par 7
+Fonctions initialiser, avancer gauche, avancer droite, avancer corriger (donc enclencher avancer gauche), rechercher, placer, afficher, 
+//ENTREES : Aucune entrée
+//SORTIE : Le carré magique
+
+
+
+
+
+
+CONST  
+COTE <- 5 : ENTIER //valeur à modifier en 7 pour avoir un tableau de 7 par 7
+CMIN <- 1 : ENTIER //pour Coordonnée MINimale
+CSMIN <- 0 : ENTIER //pour Coordonnée Supérieure MINimale
+CMAX <- 5 : ENTIER
+CSMAX <- 6 : ENTIER
+
+
+
+TYPE Position = ENREGISTREMENT
+	x : ENTIER
+	y : ENTIER
+FIN ENREGISTREMENT
+
+
+
+
+
+PROCEDURE initialiser (VAR Carre : TABLEAU de ENTIER, VAR Jeton : position) 
+// passage par variable car l'on garde la valeur du Tableau
+	VAR
+		cpt, cpt2 : ENTIER
+	DEBUT
+	//on initialise le tableau
+		POUR cpt DE 1 A COTE FAIRE
+			POUR cpt2 DE 1 A COTE FAIRE
+				Carre[cpt, cpt2] <- 0
+			FIN POUR
+		FIN POUR
+
+	//on initialise le jeton à l'ouest du milieu du tableau (comme ça, pour le premier mouvement, il atteindra le nord du milieu)
+	Jeton.x <- 2
+	Jeton.y <- 3
+
+	FIN PROCEDURE
+
+
+PROCEDURE afficher (Carre : TABLEAU de ENTIER) 
+	VAR
+		cpt, cpt2 : ENTIER
+	DEBUT
+		POUR cpt DE 1 A COTE FAIRE
+			POUR cpt2 DE 1 A COTE FAIRE
+				ECRIRE Carre[cpt, cpt2], ' ' //on laisse un espace entre chaque valeur
+			FIN POUR
+		FIN POUR
+	FIN PROCEDURE
+
+
+PROCEDURE avancer_droite (VAR Jeton : position, VAR Carre : TABLEAU de ENTIER, cpt : ENTIER)
+	DEBUT
+		Jeton.x <- Jeton.x + 1
+		Jeton.y <- Jeton.y - 1
+
+		SI (Jeton.x = CSMIN) ALORS
+			//on le fait revenir en WRAP à droite de la grille
+			Jeton.x <- CMAX
+		SINON
+			SI (Jeton.x = CSMAX) ALORS
+				Jeton.x <-CMIN
+				//on le fait revenir en WRAP à gauche de la grille
+			FIN SI
+		FIN SI
+
+		SI (Jeton.y = CSMIN) ALORS
+			Jeton.y <- CMAX
+			//on le fait revenir en WRAP en bas de la grille
+		SINON
+			SI (Jeton.y = CSMAX) ALORS
+				Jeton.y <- CMIN
+				//on le fait revenir en WRAP en haut de la grille
+			FIN SI
+		FIN SI
+
+		rechercher_vide (Jeton, Carre, cpt)
+	FIN PROCEDURE
+
+
+
+PROCEDURE rechercher_vide (VAR Jeton : position, VAR Carre : TABLEAU de ENTIER, cpt : ENTIER)
+//si VRAI go to placer, si FAUX go to corriger
+	DEBUT	
+
+		SI (Carre[Jeton.x, Jeton.y] = 0) ALORS
+			// Si la valeur de la grille est 0, on appelle la procédure placer
+			placer (Jeton, Carre, cpt)
+		SINON
+			//sinon, nous corrigeons la trajectoire du cheminement
+			corriger (Jeton, Carre)
+		FIN SI
+	FIN PROCEDURE
+
+
+PROCEDURE corriger (VAR Jeton : position, VAR Carre : TABLEAU de ENTIER)
+	DEBUT
+		avancer_gauche (Jeton, Carre)
+	FIN PROCEDURE
+
+
+
+PROCEDURE avancer_gauche (VAR Jeton : position, VAR Carre : TABLEAU de ENTIER, cpt : ENTIER)
+	DEBUT
+		Jeton.x <- Jeton.x - 1
+		Jeton.y <- Jeton.y - 1
+
+		SI (Jeton.x = CSMIN) ALORS
+			Jeton.x <- CMAX
+		SINON
+			SI (Jeton.x = CSMAX) ALORS
+				Jeton.x <- CMIN
+			FIN SI
+		FIN SI
+		SI (Jeton.y = CSMIN) ALORS
+			Jeton.y <- CMAX
+		SINON
+			SI (Jeton.y = CSMAX) ALORS
+				Jeton.y <- CMIN
+			FIN SI
+		FIN SI
+
+		rechercher_vide (Jeton, Carre, cpt)
+
+	FIN PROCEDURE
+
+
+PROCEDURE placer (Jeton : position, VAR Carre : TABLEAU de ENTIER, cpt : ENTIER)
+	DEBUT
+		//on affecte la valeur dans la cellule 
+		Carre[Jeton.x, Jeton.y] <- cpt
+	FIN PROCEDURE
+
+
+
+
+
+VAR 
+//variable locale à au programme principal (main)
+	Carre : TABLEAU [1..COTE, 1..COTE] de ENTIER
+	Jeton : position
+	cpt : ENTIER
+
+
+
+
+DEBUT //programme principal MAIN, 5 lignes de code
+
+	//on initialise nos variables
+	initialiser (Jeton, Carre) 
+
+	//boucle de traitement
+	POUR cpt de 1 A COTE*COTE FAIRE
+		avancer_droite (Jeton, Carre, cpt)
+	FIN POUR
+	
+	//affichage de la grille
+	afficher (Carre)
+FIN.
+
+
